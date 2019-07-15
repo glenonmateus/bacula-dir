@@ -1,0 +1,28 @@
+#!/bin/bash
+
+: ${BACULA_DEBUG="50"}
+: ${BACULA_DBUSER="bacula"}
+: ${BACULA_DBHOST="bacula-db"}
+: ${BACULA_DBNAME="bacula"}
+: ${BACULA_DIRNAME="bacula"}
+: ${BACULA_CONSOLEPASSWORD="password"}
+: ${BACULA_FDNAME="bacula-fd"}
+
+echo "=> Checking wether database service at ${BACULA_DBHOST} is up"
+while true; do ping -c1 ${BACULA_DBHOST} > /dev/null && break; done
+echo "=> Succeeded"
+
+for d in $(seq 10 -1 1); do
+ echo "=> Waiting ${d}s for the database service to start"
+ sleep 1
+done
+
+echo "${BACULA_DBHOST}:*:*:${BACULA_DBUSER}:${DB_PASSWORD}" > /root/.pgpass
+chmod 0600 /root/.pgpass
+
+echo "=> Attempting database setup"
+if psql -h ${BACULA_DBHOST} -U ${BACULA_DBUSER} -lqt | cut -d\| -f1 | grep -qw ${BACULA_DBNAME}; then
+ echo "=> Database already setup; skipping."
+else 
+ echo "=> Setting Database ..."
+fi
