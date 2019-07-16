@@ -1,12 +1,13 @@
 #!/bin/bash
 
-: ${BACULA_DEBUG="50"}
-: ${BACULA_DBUSER="bacula"}
-: ${BACULA_DBHOST="bacula-db"}
-: ${BACULA_DBNAME="bacula"}
-: ${BACULA_DIRNAME="bacula"}
-: ${BACULA_CONSOLEPASSWORD="password"}
-: ${BACULA_FDNAME="bacula-fd"}
+: ${BACULA_DEBUG:="50"}
+: ${BACULA_DBUSER:="bacula"}
+: ${BACULA_DBHOST:="bacula-db"}
+: ${BACULA_DBNAME:="bacula"}
+: ${BACULA_DIRNAME:="bacula"}
+: ${BACULA_CONSOLEPASSWORD:="password"}
+: ${BACULA_FDNAME:="bacula-fd"}
+: ${BACULA_DIRADDRESS:="127.0.0.1"}
 
 echo "=> Checking wether database service at ${BACULA_DBHOST} is up"
 while true; do ping -c1 ${BACULA_DBHOST} > /dev/null && break; done
@@ -26,3 +27,19 @@ if psql -h ${BACULA_DBHOST} -U ${BACULA_DBUSER} -lqt | cut -d\| -f1 | grep -qw $
 else 
  echo "=> Setting Database ..."
 fi
+
+CONFIGS_VARS=(
+ BACULA_DBUSER
+ BACULA_DBHOST
+ BACULA_DBNAME
+ BACULA_DIRNAME
+ BACULA_CONSOLEPASSWORD
+ BACULA_FDNAME
+ BACULA_DIRADDRESS
+ )
+
+echo "=> Setting Bacula Director ..."
+for c in ${CONFIGS_VARS[@]}; do
+ sed -i "s,@@${c}@@,$(eval echo \$${c})," /etc/bacula/bacula-dir.conf
+ sed -i "s,@@${c}@@,$(eval echo \$${c})," /etc/bacula/bconsole.conf
+done
