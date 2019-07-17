@@ -1,4 +1,4 @@
-FROM debian
+FROM debian:buster
 
 ENV BACULA_VERSION 9.4.4
 ENV DEBIAN_FRONTEND=noninteractive
@@ -10,7 +10,7 @@ RUN apt-get update \
 	file \
 	make \
 	build-essential \
-	postgresql-server-dev-9.6 \
+	postgresql-server-dev-11 \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /etc/bacula /var/lib/bacula /run/bacula /etc/bacula/scripts \
     && useradd -U -s /bin/sh -d /var/lib/bacula bacula \
