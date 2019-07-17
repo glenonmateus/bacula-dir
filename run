@@ -1,8 +1,8 @@
 #!/bin/bash
 
 : ${BACULA_DEBUG:="50"}
-: ${BACULA_DBHOST:="bacula-db"}
-: ${BACULA_DBNAME:="bacula"}
+: ${BACULA_DBHOST:="bacula"}
+: ${BACULA_DBNAME:="bacula-db"}
 : ${BACULA_DBUSER:="bacula"}
 : ${BACULA_DBPASSWORD:="bacula"}
 : ${BACULA_DIRNAME:="bacula"}

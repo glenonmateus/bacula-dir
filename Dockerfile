@@ -35,10 +35,10 @@ COPY ["run", "/usr/local/bin/"]
 COPY ["bconsole.conf", "/etc/bacula/"]
 COPY ["bacula-dir.conf", "/etc/bacula/"]
 
-RUN chmod +x /usr/local/bin
+RUN chmod +x /usr/local/bin/run
 
 EXPOSE 9101
 
 VOLUME ["/etc/bacula/", "/var/lib/bacula/"]
 
-ENTRYPOINT ["bash"]
+ENTRYPOINT ["/usr/local/bin/run"]
