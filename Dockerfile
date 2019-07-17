@@ -11,7 +11,7 @@ RUN apt-get update \
 	make \
 	build-essential \
 	postgresql-server-dev-9.6 \
-    && apt-get autoremove && apt-get clean && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /etc/bacula /var/lib/bacula /run/bacula /etc/bacula/scripts \
     && useradd -U -s /bin/sh -d /var/lib/bacula bacula \
     && curl -sL https://sourceforge.net/projects/bacula/files/bacula/${BACULA_VERSION}/bacula-${BACULA_VERSION}.tar.gz/download -o bacula-${BACULA_VERSION}.tar.gz \
