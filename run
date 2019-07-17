@@ -1,13 +1,15 @@
 #!/bin/bash
 
 : ${BACULA_DEBUG:="50"}
-: ${BACULA_DBUSER:="bacula"}
 : ${BACULA_DBHOST:="bacula-db"}
 : ${BACULA_DBNAME:="bacula"}
+: ${BACULA_DBUSER:="bacula"}
+: ${BACULA_DBPASSWORD:="bacula"}
 : ${BACULA_DIRNAME:="bacula"}
 : ${BACULA_CONSOLEPASSWORD:="password"}
 : ${BACULA_FDNAME:="bacula-fd"}
 : ${BACULA_DIRADDRESS:="127.0.0.1"}
+: ${BACULA_SDADDRESS:="127.0.0.1"}
 
 echo "=> Checking wether database service at ${BACULA_DBHOST} is up"
 while true; do ping -c1 ${BACULA_DBHOST} > /dev/null && break; done
@@ -29,13 +31,15 @@ else
 fi
 
 CONFIGS_VARS=(
- BACULA_DBUSER
  BACULA_DBHOST
  BACULA_DBNAME
+ BACULA_DBUSER
+ BACULA_DBPASSWORD
  BACULA_DIRNAME
  BACULA_CONSOLEPASSWORD
  BACULA_FDNAME
  BACULA_DIRADDRESS
+ BACULA_SDADDRESS
  )
 
 echo "=> Setting Bacula Director ..."
