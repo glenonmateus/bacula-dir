@@ -12,22 +12,36 @@
 : ${BACULA_SDADDRESS:="127.0.0.1"}
 
 echo "=> Checking wether database service at ${BACULA_DBHOST} is up"
-while true; do ping -c1 ${BACULA_DBHOST} > /dev/null && break; done
-echo "=> Succeeded"
+if ping -c1 ${BACULA_DBHOST} > /dev/null; then
+ echo "=> Succeeded, Database up ..."
+else
+ echo "=> Database down, exiting"
+ exit 1
+fi 
 
-for d in $(seq 10 -1 1); do
- echo "=> Waiting ${d}s for the database service to start"
+for i in $(seq 10 -1 1)
+do
+ echo "=> Waiting database configuration ${i} ..."
  sleep 1
 done
 
-echo "${BACULA_DBHOST}:*:*:${BACULA_DBUSER}:${DB_PASSWORD}" > /root/.pgpass
-chmod 0600 /root/.pgpass
+echo "${BACULA_DBHOST}:*:*:${BACULA_DBUSER}:${BACULA_DBPASSWORD}" >> ~/.pgpass
+echo "${BACULA_DBHOST}:*:*:postgres:${BACULA_DBPASSWORD}" >> ~/.pgpass
+chmod 0600 ~/.pgpass
+
+echo "=> Creating user ${BACULA_DBUSER}"
+psql -h ${BACULA_DBHOST} -U postgres -c "CREATE USER ${BACULA_DBUSER} WITH ENCRYPTED PASSWORD '${BACULA_DBPASSWORD}'"
 
 echo "=> Attempting database setup"
-if psql -h ${BACULA_DBHOST} -U ${BACULA_DBUSER} -lqt | cut -d\| -f1 | grep -qw ${BACULA_DBNAME}; then
- echo "=> Database already setup; skipping."
+if psql -h ${BACULA_DBHOST} -U ${BACULA_DBUSER} -lqt | cut -d\| -f1 | grep -w ${BACULA_DBNAME}; then
+ echo "=> Database already setup, skipping."
 else 
  echo "=> Setting Database ..."
+ db_name=${BACULA_DBNAME}
+ /etc/bacula/scripts/create_postgresql_database -h ${BACULA_DBHOST} -U postgres
+ /etc/bacula/scripts/make_postgresql_tables -h ${BACULA_DBHOST} -U postgres
+ /etc/bacula/scripts/grant_postgresql_privileges -h ${BACULA_DBHOST} -U postgres
+ unset db_name
 fi
 
 CONFIGS_VARS=(
