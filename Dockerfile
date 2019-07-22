@@ -11,6 +11,7 @@ RUN apt-get update \
 	make \
 	build-essential \
 	postgresql-server-dev-11 \
+	postgresql-client \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /etc/bacula /var/lib/bacula /run/bacula /etc/bacula/scripts \
     && useradd -U -s /bin/sh -d /var/lib/bacula bacula \
@@ -41,4 +42,4 @@ EXPOSE 9101
 
 VOLUME ["/etc/bacula/", "/var/lib/bacula/"]
 
-ENTRYPOINT ["/usr/local/bin/run"]
+CMD ["/usr/local/bin/run"]
