@@ -42,4 +42,4 @@ EXPOSE 9101
 
 VOLUME ["/etc/bacula/", "/var/lib/bacula/", "/var/log/bacula/"]
 
-CMD ["/usr/local/bin/run"]
+ENTRYPOINT ["/usr/local/bin/run"]
