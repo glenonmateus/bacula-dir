@@ -8,11 +8,14 @@
 : ${BACULA_DIRNAME:="bacula"}
 : ${BACULA_CONSOLEPASSWORD:="password"}
 : ${BACULA_FDNAME:="bacula-fd"}
+: ${BACULA_FDPASSWORD:="password"}
+: ${BACULA_SDPASSWORD:="password"}
 : ${BACULA_DIRADDRESS:="127.0.0.1"}
+: ${BACULA_FDADDRESS:="127.0.0.1"}
 : ${BACULA_SDADDRESS:="127.0.0.1"}
 
 echo "=> Checking wether database service at ${BACULA_DBHOST} is up"
-if ping -c1 ${BACULA_DBHOST} > /dev/null; then
+if ping -q -c 1 -W 1 ${BACULA_DBHOST} > /dev/null; then
  echo "=> Succeeded, Database up ..."
 else
  echo "=> Database down, exiting"
@@ -25,22 +28,27 @@ do
  sleep 1
 done
 
-echo "${BACULA_DBHOST}:*:*:${BACULA_DBUSER}:${BACULA_DBPASSWORD}" >> ~/.pgpass
 echo "${BACULA_DBHOST}:*:*:postgres:${BACULA_DBPASSWORD}" >> ~/.pgpass
 chmod 0600 ~/.pgpass
 
-echo "=> Creating user ${BACULA_DBUSER}"
-psql -h ${BACULA_DBHOST} -U postgres -c "CREATE USER ${BACULA_DBUSER} WITH ENCRYPTED PASSWORD '${BACULA_DBPASSWORD}'"
-
 echo "=> Attempting database setup"
-if psql -h ${BACULA_DBHOST} -U ${BACULA_DBUSER} -lqt | cut -d\| -f1 | grep -w ${BACULA_DBNAME}; then
+if [ -f $(psql -h ${BACULA_DBHOST} -U postgres -lqt | cut -d\| -f1 | grep -w ${BACULA_DBNAME}) ]; then
  echo "=> Database already setup, skipping."
 else 
  echo "=> Setting Database ..."
  db_name=${BACULA_DBNAME}
- /etc/bacula/scripts/create_postgresql_database -h ${BACULA_DBHOST} -U postgres
- /etc/bacula/scripts/make_postgresql_tables -h ${BACULA_DBHOST} -U postgres
- /etc/bacula/scripts/grant_postgresql_privileges -h ${BACULA_DBHOST} -U postgres
+ echo -n "=> Creating Database ... "
+ /etc/bacula/scripts/create_postgresql_database -h ${BACULA_DBHOST} -U postgres > /dev/null
+ echo "Done"
+ echo -n "=> Making Tables ... "
+ /etc/bacula/scripts/make_postgresql_tables -h ${BACULA_DBHOST} -U postgres > /dev/null
+ echo "Done"
+ echo -n "=> Granting Privileges ... "
+ /etc/bacula/scripts/grant_postgresql_privileges -h ${BACULA_DBHOST} -U postgres > /dev/null
+ echo "Done"
+ echo -n "=> Setting Bacula User Password ... "
+ psql -h ${BACULA_DBHOST} -U postgres -c "ALTER USER ${BACULA_DBUSER} WITH PASSWORD '${BACULA_DBPASSWORD}'" > /dev/null
+ echo "Done"
  unset db_name
 fi
 
@@ -52,6 +60,7 @@ CONFIGS_VARS=(
  BACULA_DIRNAME
  BACULA_CONSOLEPASSWORD
  BACULA_FDNAME
+ BACULA_FDADDRESS
  BACULA_DIRADDRESS
  BACULA_SDADDRESS
  )
@@ -61,3 +70,9 @@ for c in ${CONFIGS_VARS[@]}; do
  sed -i "s,@@${c}@@,$(eval echo \$${c})," /etc/bacula/bacula-dir.conf
  sed -i "s,@@${c}@@,$(eval echo \$${c})," /etc/bacula/bconsole.conf
 done
+
+echo "=> Checking Bacula Director Configuration ..."
+bacula-dir -t -c /etc/bacula/bacula-dir.conf
+
+echo "=> Starting Bacula Director ..."
+bacula-dir -f -c /etc/bacula/bacula-dir.conf -d ${BACULA_DEBUG}
