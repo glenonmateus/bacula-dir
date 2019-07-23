@@ -13,7 +13,7 @@ RUN apt-get update \
 	postgresql-server-dev-11 \
 	postgresql-client \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
-    && mkdir -p /etc/bacula /var/lib/bacula /run/bacula /etc/bacula/scripts \
+    && mkdir -p /etc/bacula /var/lib/bacula /run/bacula /etc/bacula/scripts /var/log/bacula/ \
     && useradd -U -s /bin/sh -d /var/lib/bacula bacula \
     && curl -sL https://sourceforge.net/projects/bacula/files/bacula/${BACULA_VERSION}/bacula-${BACULA_VERSION}.tar.gz/download -o bacula-${BACULA_VERSION}.tar.gz \
     && tar xzf bacula-${BACULA_VERSION}.tar.gz && cd bacula-${BACULA_VERSION} \
@@ -40,6 +40,6 @@ RUN chmod +x /usr/local/bin/run
 
 EXPOSE 9101
 
-VOLUME ["/etc/bacula/", "/var/lib/bacula/"]
+VOLUME ["/etc/bacula/", "/var/lib/bacula/", "/var/log/bacula/"]
 
 CMD ["/usr/local/bin/run"]

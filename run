@@ -2,7 +2,7 @@
 
 : ${BACULA_DEBUG:="50"}
 : ${BACULA_DBHOST:="bacula"}
-: ${BACULA_DBNAME:="bacula-db"}
+: ${BACULA_DBNAME:="baculadb"}
 : ${BACULA_DBUSER:="bacula"}
 : ${BACULA_DBPASSWORD:="bacula"}
 : ${BACULA_DIRNAME:="bacula"}
@@ -28,28 +28,25 @@ do
  sleep 1
 done
 
+echo "${BACULA_DBHOST}:*:*:${BACULA_DBUSER}:${BACULA_DBPASSWORD}" >> ~/.pgpass
 echo "${BACULA_DBHOST}:*:*:postgres:${BACULA_DBPASSWORD}" >> ~/.pgpass
 chmod 0600 ~/.pgpass
 
+chown -R bacula:bacula /var/log/bacula/
+
 echo "=> Attempting database setup"
-if [ -f $(psql -h ${BACULA_DBHOST} -U postgres -lqt | cut -d\| -f1 | grep -w ${BACULA_DBNAME}) ]; then
+if [ -n "$(psql -h ${BACULA_DBHOST} -U postgres -lqt | cut -d'|' -f 1 | grep -w ${BACULA_DBNAME})" ]; then
  echo "=> Database already setup, skipping."
 else 
  echo "=> Setting Database ..."
- db_name=${BACULA_DBNAME}
  echo -n "=> Creating Database ... "
- /etc/bacula/scripts/create_postgresql_database -h ${BACULA_DBHOST} -U postgres > /dev/null
+ psql -h ${BACULA_DBHOST} -U postgres -c "CREATE USER ${BACULA_DBUSER} WITH ENCRYPTED PASSWORD '${BACULA_DBPASSWORD}'" > /dev/null
+ psql -h ${BACULA_DBHOST} -U postgres -c "CREATE DATABASE ${BACULA_DBNAME} WITH OWNER ${BACULA_DBUSER}" > /dev/null
+ psql -h ${BACULA_DBHOST} -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE ${BACULA_DBNAME} TO ${BACULA_DBUSER}" > /dev/null
  echo "Done"
  echo -n "=> Making Tables ... "
- /etc/bacula/scripts/make_postgresql_tables -h ${BACULA_DBHOST} -U postgres > /dev/null
+ /etc/bacula/scripts/make_postgresql_tables -h ${BACULA_DBHOST} -U ${BACULA_DBUSER} -d ${BACULA_DBNAME} > /dev/null
  echo "Done"
- echo -n "=> Granting Privileges ... "
- /etc/bacula/scripts/grant_postgresql_privileges -h ${BACULA_DBHOST} -U postgres > /dev/null
- echo "Done"
- echo -n "=> Setting Bacula User Password ... "
- psql -h ${BACULA_DBHOST} -U postgres -c "ALTER USER ${BACULA_DBUSER} WITH PASSWORD '${BACULA_DBPASSWORD}'" > /dev/null
- echo "Done"
- unset db_name
 fi
 
 CONFIGS_VARS=(
@@ -63,6 +60,8 @@ CONFIGS_VARS=(
  BACULA_FDADDRESS
  BACULA_DIRADDRESS
  BACULA_SDADDRESS
+ BACULA_FDPASSWORD
+ BACULA_SDPASSWORD
  )
 
 echo "=> Setting Bacula Director ..."
