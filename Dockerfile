@@ -1,7 +1,7 @@
 FROM debian:buster
 
 ENV BACULA_VERSION 9.4.4
-ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update \
     && apt-get install --no-install-recommends -y \
