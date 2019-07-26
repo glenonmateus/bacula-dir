@@ -17,7 +17,7 @@ RUN apt-get update \
     && useradd -U -s /bin/sh -d /var/lib/bacula bacula \
     && curl -sL https://sourceforge.net/projects/bacula/files/bacula/${BACULA_VERSION}/bacula-${BACULA_VERSION}.tar.gz/download -o bacula-${BACULA_VERSION}.tar.gz \
     && tar xzf bacula-${BACULA_VERSION}.tar.gz && cd bacula-${BACULA_VERSION} \
-    && ./configure \ 
+    && ./configure \
 	--enable-smartalloc \
 	--sbindir=/usr/bin/ \
 	--sysconfdir=/etc/bacula/ \
