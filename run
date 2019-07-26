@@ -1,5 +1,6 @@
 #!/bin/bash
 
+: ${BACULA_LOGDIR:="/var/log/bacula/"}
 : ${BACULA_DEBUG:="50"}
 : ${BACULA_DBHOST:="bacula"}
 : ${BACULA_DBNAME:="baculadb"}
@@ -20,7 +21,7 @@ if ping -q -c 1 -W 1 ${BACULA_DBHOST} > /dev/null; then
 else
  echo "=> Database down, exiting"
  exit 1
-fi 
+fi
 
 for i in $(seq 10 -1 1)
 do
@@ -32,12 +33,12 @@ echo "${BACULA_DBHOST}:*:*:${BACULA_DBUSER}:${BACULA_DBPASSWORD}" >> ~/.pgpass
 echo "${BACULA_DBHOST}:*:*:postgres:${BACULA_DBPASSWORD}" >> ~/.pgpass
 chmod 0600 ~/.pgpass
 
-chown -R bacula:bacula /var/log/bacula/
+[ -d "${BACULA_LOGDIR}" ] && chown -R bacula:bacula ${BACULA_LOGDIR}
 
 echo "=> Attempting database setup"
 if [ -n "$(psql -h ${BACULA_DBHOST} -U postgres -lqt | cut -d'|' -f 1 | grep -w ${BACULA_DBNAME})" ]; then
  echo "=> Database already setup, skipping."
-else 
+else
  echo "=> Setting Database ..."
  echo -n "=> Creating Database ... "
  psql -h ${BACULA_DBHOST} -U postgres -c "CREATE USER ${BACULA_DBUSER} WITH ENCRYPTED PASSWORD '${BACULA_DBPASSWORD}'" > /dev/null
