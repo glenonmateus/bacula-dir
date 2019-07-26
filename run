@@ -42,6 +42,7 @@ else
  echo -n "=> Creating Database ... "
  psql -h ${BACULA_DBHOST} -U postgres -c "CREATE USER ${BACULA_DBUSER} WITH ENCRYPTED PASSWORD '${BACULA_DBPASSWORD}'" > /dev/null
  psql -h ${BACULA_DBHOST} -U postgres -c "CREATE DATABASE ${BACULA_DBNAME} WITH OWNER ${BACULA_DBUSER}" > /dev/null
+ psql -h ${BACULA_DBHOST} -U postgres -c "UPDATE pg_database SET encoding = pg_char_to_encoding('SQL_ASCII') WHERE datname = '${BACULA_DBNAME}'" > /dev/null
  psql -h ${BACULA_DBHOST} -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE ${BACULA_DBNAME} TO ${BACULA_DBUSER}" > /dev/null
  echo "Done"
  echo -n "=> Making Tables ... "
