@@ -57,7 +57,6 @@ Bacula Storage Daemon address (default **127.0.0.1**)
 # Docker Compose
 
 ```
-
 version: "3.7"
 
 services:
@@ -114,6 +113,8 @@ services:
     - BACULA_DBNAME=baculadb
     - BACULA_DBUSER=bacula
     - BACULA_DBPASSWORD=bacula
+    - BACULA_SDPASSWORD=password
+    - BACULA_FDPASSWORD=password
     - BACULA_FDADDRESS=bacula-fd
     - BACULA_SDADDRESS=bacula-sd
    networks:
@@ -139,3 +140,7 @@ networks:
  bacula:
 
 ```
+
+# Bacula Console
+
+`docker container exec -it <bacula-dir> bconsole`
