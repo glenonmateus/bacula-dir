@@ -64,80 +64,80 @@ services:
  postgres:
   image: postgres:alpine
   environment:
-   - POSTGRES_PASSWORD=bacula
+  - POSTGRES_PASSWORD=bacula
   networks:
-   - bacula
+  - bacula
   volumes:
-    - catalog:/var/lib/postgresql/data
+  - catalog:/var/lib/postgresql/data
   deploy:
-   replicas: 1
-   restart_policy:
-     condition: on-failure
+    replicas: 1
+    restart_policy:
+      condition: on-failure
 
  bacula-fd:
   image: glenonmateus/bacula-fd:9.4.4
   volumes:
-   - bacula-fd:/etc/bacula
+  - bacula-fd:/etc/bacula
   environment:
-   - BACULA_FDPASSWORD=password
+  - BACULA_FDPASSWORD=password
   networks:
-   - bacula
+  - bacula
   ports:
-   - 9102:9102
+  - 9102:9102
   deploy:
-   mode: global
-   restart_policy:
-     condition: on-failure
+    mode: global
+    restart_policy:
+      condition: on-failure
 
  bacula-sd:
-   image: glenonmateus/bacula-sd:9.4.4
+  image: glenonmateus/bacula-sd:9.4.4
   volumes:
-   - bacula-sd:/etc/bacula
+  - bacula-sd:/etc/bacula
   environment:
-   - BACULA_SDPASSWORD=password
+  - BACULA_SDPASSWORD=password
   networks:
-   - bacula
+  - bacula
   ports:
-   - 9103:9103
+  - 9103:9103
   deploy:
-   replicas: 1
-   restart_policy:
-     condition: on-failure
+    replicas: 1
+    restart_policy:
+      condition: on-failure
 
  bacula-dir:
-   image: glenonmateus/bacula-dir:9.4.4
-   volumes:
-    - bacula-dir:/etc/bacula
-   environment:
-    - BACULA_DBHOST=postgres
-    - BACULA_DBNAME=baculadb
-    - BACULA_DBUSER=bacula
-    - BACULA_DBPASSWORD=bacula
-    - BACULA_SDPASSWORD=password
-    - BACULA_FDPASSWORD=password
-    - BACULA_FDADDRESS=bacula-fd
-    - BACULA_SDADDRESS=bacula-sd
-   networks:
-    - bacula
-   ports:
-    - 9101:9101
-   depends_on:
-    - postgres
-    - bacula-fd
-    - bacula-sd
-   deploy:
+  image: glenonmateus/bacula-dir:9.4.4
+  volumes:
+  - bacula-dir:/etc/bacula
+  environment:
+  - BACULA_DBHOST=postgres
+  - BACULA_DBNAME=baculadb
+  - BACULA_DBUSER=bacula
+  - BACULA_DBPASSWORD=bacula
+  - BACULA_SDPASSWORD=password
+  - BACULA_FDPASSWORD=password
+  - BACULA_FDADDRESS=bacula-fd
+  - BACULA_SDADDRESS=bacula-sd
+  networks:
+  - bacula
+  ports:
+  - 9101:9101
+  depends_on:
+  - postgres
+  - bacula-fd
+  - bacula-sd
+  deploy:
     replicas: 1
     restart_policy:
       condition: on-failure
 
 volumes:
- catalog:
- bacula-fd:
- bacula-sd:
- bacula-dir:
+  catalog:
+  bacula-fd:
+  bacula-sd:
+  bacula-dir:
 
 networks:
- bacula:
+  bacula:
 
 ```
 
